@@ -1,0 +1,64 @@
+{
+    "name": "cloudops-solutions-website",
+    "version": "1.0.0",
+    "description": "Professional DevOps consultancy static website",
+    "main": "index.html",
+    "scripts": {
+        "dev": "npx live-server --port=3000 --host=localhost --open=/index.html",
+        "build": "npm run optimize",
+        "optimize": "npm run optimize:html && npm run optimize:css && npm run optimize:js",
+        "optimize:html": "html-minifier-terser --collapse-whitespace --remove-comments --remove-optional-tags --remove-redundant-attributes --remove-script-type-attributes --remove-tag-whitespace --use-short-doctype --minify-css true --minify-js true index.html -o dist/index.html",
+        "optimize:css": "uglifycss css/style.css > dist/css/style.css",
+        "optimize:js": "terser js/main.js --compress --mangle --output dist/js/main.js",
+        "lighthouse": "lhci autorun",
+        "test": "npm run validate:html && npm run test:lighthouse",
+        "validate:html": "html-validate index.html",
+        "test:lighthouse": "lighthouse http://localhost:3000 --output=json --output-path=./lighthouse-report.json",
+        "serve": "npx live-server --port=3000",
+        "deploy": "gh-pages -d dist"
+    },
+    "keywords": [
+        "devops",
+        "cloud",
+        "aws",
+        "azure",
+        "gcp",
+        "kubernetes",
+        "docker",
+        "terraform",
+        "ansible",
+        "jenkins",
+        "ci-cd",
+        "infrastructure",
+        "automation",
+        "monitoring",
+        "security"
+    ],
+    "author": "CloudOps Solutions",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/cloudops-solutions/website.git"
+    },
+    "homepage": "https://cloudops-solutions.github.io",
+    "devDependencies": {
+        "@lhci/cli": "^0.12.0",
+        "gh-pages": "^6.0.0",
+        "html-minifier-terser": "^7.2.0",
+        "html-validate": "^8.7.4",
+        "lighthouse": "^11.3.0",
+        "live-server": "^1.2.2",
+        "terser": "^5.24.0",
+        "uglifycss": "^0.0.29"
+    },
+    "browserslist": [
+        "> 1%",
+        "last 2 versions",
+        "not dead",
+        "not ie 11"
+    ],
+    "engines": {
+        "node": ">=16.0.0",
+        "npm": ">=8.0.0"
+    }
+}
