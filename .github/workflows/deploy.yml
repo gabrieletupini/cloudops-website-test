@@ -160,7 +160,7 @@ jobs:
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli@0.12.x
 
-      - name: Run Lighthouse CI
+      - name: Run Lighthouse CI 
         run: |
           lhci autorun --upload.target=temporary-public-storage
         env:
