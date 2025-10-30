@@ -49,7 +49,7 @@ jobs:
       - name: Install dependencies
         run: |
           if [ -f package.json ]; then
-            if [ "${{ steps.check_lock.outputs.exists }}" = "true" ]; then
+            if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ] || [ -f yarn.lock ] || [ -f pnpm-lock.yaml ]; then
               echo "Lockfile found — running npm ci"
               if npm ci; then
                 echo "npm ci succeeded"
@@ -69,9 +69,7 @@ jobs:
         run: |
           npm install -g html-minifier-terser uglifycss
           mkdir -p dist
-          # copy repo files (ignore common ephemeral dirs)
           rsync -av --exclude='.git' --exclude='node_modules' --exclude='.github' --exclude='dist' ./ ./dist/ || true
-          # Minify HTML
           if [ -f dist/index.html ]; then
             html-minifier-terser \
               --collapse-whitespace \
@@ -87,12 +85,10 @@ jobs:
               --output-dir dist \
               --file-ext html
           fi
-          # Minify CSS
           if [ -f dist/css/style.css ]; then
             uglifycss dist/css/style.css > dist/css/style.min.css
             mv dist/css/style.min.css dist/css/style.css
           fi
-          # Minify JS
           if [ -f dist/js/main.js ]; then
             npx terser dist/js/main.js --compress --mangle --output dist/js/main.min.js
             mv dist/js/main.min.js dist/js/main.js
@@ -129,7 +125,7 @@ jobs:
         uses: actions/configure-pages@v4
         with:
           enablement: true
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAGES_PAT }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
