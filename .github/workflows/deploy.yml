@@ -121,7 +121,7 @@ jobs:
           </urlset>
           EOF
 
-      - name: Setup Pages
+      - name: Setup Pages 
         uses: actions/configure-pages@v4
         with:
           enablement: true
