@@ -559,7 +559,7 @@ if ('serviceWorker' in navigator) {
 }
 
 // Export functions for potential module use
-window.CloudOpsApp = {
+window.CloudNinjaSolutionsApp = {
     showNotification,
     animateCounters,
     initMobileNavigation,
