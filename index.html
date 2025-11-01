@@ -571,7 +571,8 @@
                         </div>
                     </div>
                 </div>
-                <form class="contact-form" id="contact-form">
+                <form class="contact-form" id="contact-form" name="contact" method="POST" data-netlify="true">
+                    <input type="hidden" name="form-name" value="contact" />
                     <div class="form-group">
                         <input type="text" id="name" name="name" placeholder="Your Name" required>
                     </div>

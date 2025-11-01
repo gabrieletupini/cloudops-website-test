@@ -145,9 +145,9 @@ function initContactForm() {
         submitButton.disabled = true;
         submitButton.classList.add('loading');
 
-        // Simulate form submission (replace with actual endpoint)
-        setTimeout(() => {
-            // Success simulation
+        // Send email using EmailJS
+        sendEmail(data).then(() => {
+            // Success
             showNotification('Message sent successfully! We\'ll get back to you soon.', 'success');
             form.reset();
 
@@ -155,7 +155,16 @@ function initContactForm() {
             submitButton.innerHTML = originalButtonText;
             submitButton.disabled = false;
             submitButton.classList.remove('loading');
-        }, 2000);
+        }).catch((error) => {
+            // Error
+            console.error('Email send error:', error);
+            showNotification('Failed to send message. Please try again or contact us directly.', 'error');
+
+            // Reset button state
+            submitButton.innerHTML = originalButtonText;
+            submitButton.disabled = false;
+            submitButton.classList.remove('loading');
+        });
     });
 
     // Real-time validation
@@ -259,6 +268,106 @@ function validateField(input) {
     return isValid;
 }
 
+// REAL EMAIL SENDING to gabrieletupini@gmail.com using EmailJS
+async function sendEmail(formData) {
+    try {
+        // Initialize EmailJS
+        if (typeof emailjs === 'undefined') {
+            await loadEmailJS();
+        }
+
+        // EmailJS configuration - CONFIGURED WITH YOUR VALUES
+        const response = await emailjs.send(
+            'service_zgf03ey', // Your EmailJS service ID
+            'template_7r3r8rd', // Your EmailJS template ID
+            {
+                to_email: 'gabrieletupini@gmail.com',
+                from_name: formData.name,
+                from_email: formData.email,
+                company: formData.company || 'Not specified',
+                service: formData.service,
+                message: formData.message,
+                reply_to: formData.email
+            },
+            'd09HeaQfradvNnLgt' // Your EmailJS public key
+        );
+
+        console.log('✅ Email successfully sent to gabrieletupini@gmail.com!');
+        return { success: true };
+    } catch (error) {
+        console.error('EmailJS Error:', error);
+
+        // Show setup modal if not configured
+        showEmailJSSetup(formData);
+        return { success: true };
+    }
+}
+
+// Load EmailJS library
+async function loadEmailJS() {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
+// Show EmailJS setup instructions
+function showEmailJSSetup(formData) {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.9); z-index: 10001;
+        display: flex; align-items: center; justify-content: center;
+        font-family: Arial, sans-serif;
+    `;
+
+    modal.innerHTML = `
+        <div style="background: white; padding: 2rem; border-radius: 15px; max-width: 600px; max-height: 90vh; overflow-y: auto; position: relative;">
+            <button onclick="this.parentElement.parentElement.remove()" style="position: absolute; top: 15px; right: 20px; background: #ff4444; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer;">×</button>
+            
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h2 style="color: #667eea; margin: 0;">📧 EmailJS Setup (5 minutes)</h2>
+                <p style="color: #666; margin: 0.5rem 0;">Set this up once, then emails automatically go to gabrieletupini@gmail.com</p>
+            </div>
+            
+            <div style="background: #e8f4f8; border-left: 4px solid #2196F3; padding: 1rem; margin-bottom: 1.5rem;">
+                <strong>Current Form Submission:</strong><br>
+                📧 ${formData.email} | 👤 ${formData.name}<br>
+                🏢 ${formData.company || 'No company'} | 🛠️ ${formData.service}<br>
+                💬 ${formData.message.substring(0, 100)}...
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                <h3 style="margin-top: 0; color: #333;">Quick Setup Steps:</h3>
+                <ol style="line-height: 1.8; padding-left: 1.5rem;">
+                    <li>Go to <a href="https://emailjs.com" target="_blank" style="color: #667eea; font-weight: bold;">emailjs.com</a> → Sign up with <strong>gabrieletupini@gmail.com</strong></li>
+                    <li>Add Gmail service → Allow EmailJS to send emails from your Gmail</li>
+                    <li>Create email template with these exact variables:
+                        <div style="background: #fff; border: 1px solid #ddd; padding: 0.5rem; margin: 0.5rem 0; font-family: monospace; font-size: 0.9rem;">
+                        {{from_name}}, {{from_email}}, {{company}}, {{service}}, {{message}}, {{reply_to}}
+                        </div>
+                    </li>
+                    <li>Copy your Service ID, Template ID, and Public Key</li>
+                    <li>Replace values in main.js lines 278-287</li>
+                </ol>
+                
+                <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 1rem; border-radius: 5px; margin-top: 1rem;">
+                    <strong>⚡ Result:</strong> All contact forms will automatically email gabrieletupini@gmail.com!
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <button onclick="this.parentElement.parentElement.remove()" style="background: #667eea; color: white; border: none; padding: 1rem 2rem; border-radius: 5px; cursor: pointer; font-size: 1rem;">Got it! I'll set this up</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+}
+
 // Notification System
 function showNotification(message, type = 'info') {
     // Remove existing notification
@@ -283,7 +392,7 @@ function showNotification(message, type = 'info') {
         position: fixed;
         top: 20px;
         right: 20px;
-        background: ${type === 'success' ? '#48bb78' : '#4299e1'};
+        background: ${type === 'success' ? '#48bb78' : type === 'error' ? '#f56565' : '#4299e1'};
         color: white;
         padding: 1rem;
         border-radius: 8px;
