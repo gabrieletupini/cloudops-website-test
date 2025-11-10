@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', function () {
     initAnimationOnScroll();
     initTechStackInteractions();
     initParallaxEffects();
+    initServiceTabs();
+    initServicesPageTabs();
 });
 
 // Mobile Navigation
@@ -125,7 +127,11 @@ function initScrollEffects() {
 // Contact Form Handling
 function initContactForm() {
     const form = document.getElementById('contact-form');
+    if (!form) return; // Exit if no form found
+
     const submitButton = form.querySelector('button[type="submit"]');
+    if (!submitButton) return; // Exit if no submit button found
+
     const originalButtonText = submitButton.innerHTML;
 
     form.addEventListener('submit', function (e) {
@@ -667,12 +673,122 @@ if ('serviceWorker' in navigator) {
     });
 }
 
+// Service Tabs Functionality
+function initServiceTabs() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    // Handle tab switching
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const targetTab = this.getAttribute('data-tab');
+
+            // Remove active class from all buttons and contents
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            // Add active class to clicked button and corresponding content
+            this.classList.add('active');
+            const targetContent = document.getElementById(targetTab);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
+
+            // Add smooth transition effect
+            targetContent.style.transform = 'translateY(10px)';
+            targetContent.style.opacity = '0';
+
+            setTimeout(() => {
+                targetContent.style.transform = 'translateY(0)';
+                targetContent.style.opacity = '1';
+            }, 100);
+        });
+    });
+
+    // Initialize intersection observer for tab animation
+    const tabObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+            }
+        });
+    }, {
+        threshold: 0.2,
+        rootMargin: '0px 0px -100px 0px'
+    });
+
+    // Observe tab content areas
+    tabContents.forEach(content => {
+        tabObserver.observe(content);
+    });
+}
+
+// Services Page Tabs Functionality
+function initServicesPageTabs() {
+    const serviceNavButtons = document.querySelectorAll('.service-nav-button');
+    const serviceContents = document.querySelectorAll('.service-content');
+
+    // Only initialize if we're on the services page
+    if (serviceNavButtons.length === 0) return;
+
+    // Handle service tab switching
+    serviceNavButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const targetService = this.getAttribute('data-service');
+
+            console.log('Clicked tab:', targetService); // Debug log
+
+            // Remove active class from all buttons and contents
+            serviceNavButtons.forEach(btn => btn.classList.remove('active'));
+            serviceContents.forEach(content => content.classList.remove('active'));
+
+            // Add active class to clicked button and corresponding content
+            this.classList.add('active');
+            const targetContent = document.getElementById(targetService);
+
+            console.log('Target content found:', targetContent); // Debug log
+
+            if (targetContent) {
+                targetContent.classList.add('active');
+
+                // Add smooth transition effect
+                setTimeout(() => {
+                    targetContent.style.opacity = '1';
+                    targetContent.style.transform = 'translateY(0)';
+                }, 50);
+            } else {
+                console.error('No content found for:', targetService);
+            }
+        });
+    });
+
+    // Initialize intersection observer for service content animation
+    const serviceObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+            }
+        });
+    }, {
+        threshold: 0.2,
+        rootMargin: '0px 0px -50px 0px'
+    });
+
+    // Observe service sections
+    const serviceSections = document.querySelectorAll('.service-subsection');
+    serviceSections.forEach(section => {
+        serviceObserver.observe(section);
+    });
+}
+
 // Export functions for potential module use
-window.CloudNinjaSolutionsApp = {
+window.FluxLabsApp = {
     showNotification,
     animateCounters,
     initMobileNavigation,
     initSmoothScrolling,
     initScrollEffects,
-    initContactForm
+    initContactForm,
+    initServiceTabs,
+    initServicesPageTabs
 };
